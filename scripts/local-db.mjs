@@ -1,0 +1,21 @@
+import EmbeddedPostgres from 'embedded-postgres';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import path from 'node:path';
+const root = path.resolve(import.meta.dirname, '..');
+const local = path.join(root, '.local');
+mkdirSync(local, { recursive: true });
+const secretFile = path.join(local, 'postgres-password');
+const password = existsSync(secretFile) ? readFileSync(secretFile, 'utf8') : randomBytes(24).toString('hex');
+if (!existsSync(secretFile)) writeFileSync(secretFile, password, { mode: 0o600 });
+const pg = new EmbeddedPostgres({ databaseDir: path.join(local, 'pg-data'), port: 54329, user: 'moodmeal', password, authMethod: 'scram-sha-256', persistent: true, initdbFlags: ['--encoding=UTF8'], postgresFlags: ['-h', '127.0.0.1'], onLog: () => {}, onError: message => console.error(String(message)) });
+if (!existsSync(path.join(local, 'pg-data', 'PG_VERSION'))) await pg.initialise();
+await pg.start();
+const client = pg.getPgClient(); await client.connect();
+for (const name of ['moodmeal_utf8', 'moodmeal_utf8_test']) { const result = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [name]); if (!result.rowCount) await client.query(`CREATE DATABASE ${name} ENCODING 'UTF8' TEMPLATE template0`); }
+await client.end();
+const url = `postgresql://moodmeal:${password}@127.0.0.1:54329/moodmeal_utf8?schema=public`;
+if (!existsSync(path.join(root, 'backend', '.env'))) writeFileSync(path.join(root, 'backend', '.env'), `DATABASE_URL="${url}"\nDIRECT_URL="${url}"\nPORT=4000\nFRONTEND_ORIGIN=http://localhost:5173\n`, { mode: 0o600 });
+console.log('Local PostgreSQL ready on 127.0.0.1:54329. backend/.env was created if missing. Press Ctrl+C to stop.');
+for (const signal of ['SIGINT','SIGTERM']) process.on(signal, async () => { await pg.stop(); process.exit(0); });
+setInterval(() => {}, 60000);

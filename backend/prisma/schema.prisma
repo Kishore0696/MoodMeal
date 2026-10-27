@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+enum Mood {
+  HAPPY
+  STRESSED
+  LOW_ENERGY
+  CELEBRATORY
+  NEUTRAL
+}
+enum Role {
+  USER
+  ADMIN
+}
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  role Role @default(USER)
+  preferences Json @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  pantry PantryItem[]
+  moods MoodLog[]
+  meals MealHistory[]
+  @@map("users")
+}
+model Session {
+  id String @id @default(cuid())
+  tokenHash String @unique
+  csrfToken String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+model Recipe {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  description String
+  image String
+  imageCredit String
+  prepTime Int
+  cookTime Int
+  servings Int @default(1)
+  instructions String[]
+  calories Float
+  protein Float
+  carbs Float
+  fat Float
+  sugar Float
+  comfort Float
+  energy Float
+  vegetarian Boolean
+  dietaryTags String[]
+  allergens String[]
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ingredients RecipeIngredient[]
+  moodTags RecipeMoodTag[]
+  meals MealHistory[]
+  @@index([active, vegetarian])
+  @@map("recipes")
+}
+model Ingredient {
+  id String @id @default(cuid())
+  name String @unique
+  recipes RecipeIngredient[]
+  pantry PantryItem[]
+  @@map("ingredients")
+}
+model RecipeIngredient {
+  recipeId String
+  ingredientId String
+  quantity String
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  @@id([recipeId, ingredientId])
+  @@index([ingredientId])
+  @@map("recipe_ingredients")
+}
+model RecipeMoodTag {
+  recipeId String
+  mood Mood
+  score Float
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  @@id([recipeId, mood])
+  @@index([mood])
+  @@map("recipe_mood_tags")
+}
+model PantryItem {
+  id String @id @default(cuid())
+  userId String
+  ingredientId String
+  quantity String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+  @@unique([userId, ingredientId])
+  @@map("pantry_items")
+}
+model MoodLog {
+  id String @id @default(cuid())
+  userId String
+  mood Mood
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals MealHistory[]
+  @@index([userId, createdAt])
+  @@map("mood_logs")
+}
+model MealHistory {
+  id String @id @default(cuid())
+  userId String
+  recipeId String
+  moodLogId String
+  mood Mood
+  snapshot Json
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Restrict)
+  moodLog MoodLog @relation(fields: [moodLogId], references: [id], onDelete: Restrict)
+  @@index([userId, createdAt])
+  @@index([userId, mood])
+  @@map("meal_history")
+}

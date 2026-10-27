@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: moodmeal-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build -w backend
+    startCommand: npm run db:migrate && npm run start -w backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: COOKIE_SAME_SITE
+        value: lax

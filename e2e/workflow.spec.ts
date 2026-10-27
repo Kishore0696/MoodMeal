@@ -1,0 +1,25 @@
+import { test, expect } from '@playwright/test';
+test('register, select mood, edit pantry, save preferences, choose a meal and view persistent history', async ({ page }) => {
+  const email = `browser-${Date.now()}@moodmeal.example`;
+  await page.goto('/register');
+  await page.getByLabel('Your name').fill('Browser Cook'); await page.getByLabel('Email address').fill(email); await page.getByLabel('Password', { exact: true }).fill('browser workflow passphrase');
+  await page.getByRole('button', { name: 'Create my account' }).click();
+  await expect(page).toHaveURL(/dashboard/);
+  await page.getByRole('button', { name: /Stressed/ }).click(); await expect(page.getByText('Mood saved')).toBeVisible();
+  await page.getByText('Make the most of your pantry').click();
+  await page.getByLabel('Ingredient', { exact: true }).fill('rice'); await page.getByLabel('Quantity (optional)').fill('500 g'); await page.getByRole('button', { name: 'Add ingredient' }).click();
+  await expect(page.getByRole('button', { name: 'Remove rice' })).toBeVisible();
+  await page.getByText('Your nutrition & preferences').click();
+  await page.getByRole('combobox', { name: /Dietary preference/ }).selectOption('vegetarian'); await page.getByRole('button', { name: 'Save preferences' }).click();
+  await expect(page.getByText(/Preferences saved/)).toBeVisible();
+  await page.getByRole('button', { name: 'Find my meal' }).click();
+  await expect(page.getByText('Your feel-good shortlist.')).toBeVisible();
+  const first = page.locator('.recipe-card').first(); const recipeName = await first.locator('h3').innerText();
+  await first.getByRole('button', { name: /^Choose/ }).click(); await expect(page.getByRole('status').filter({ hasText: /saved to your meal history/ })).toBeVisible();
+  await page.goto('/history'); await expect(page.locator('.history-card').filter({ hasText: recipeName })).toBeVisible();
+  await page.reload(); await expect(page.locator('.history-card').filter({ hasText: recipeName })).toBeVisible();
+  await page.goto('/analytics'); await expect(page.getByRole('heading', { name: 'Your mood mix' })).toBeVisible();
+  await page.getByRole('button', { name: 'Logout' }).click(); await expect(page.getByLabel('Email address')).toBeVisible();
+  await page.getByLabel('Email address').fill(email); await page.getByLabel('Password', { exact: true }).fill('browser workflow passphrase'); await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page).toHaveURL(/dashboard/); await page.goto('/history'); await expect(page.locator('.history-card').filter({ hasText: recipeName })).toBeVisible();
+});

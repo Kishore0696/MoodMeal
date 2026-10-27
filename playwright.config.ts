@@ -1,0 +1,2 @@
+import { defineConfig, devices } from '@playwright/test';
+export default defineConfig({ testDir: './e2e', timeout: 60000, retries: 0, use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' }, projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }], webServer: [{ command: 'npm run dev -w backend', url: 'http://localhost:4000/api/health', reuseExistingServer: true, timeout: 60000 }, { command: 'npm run dev -w frontend -- --host localhost', url: 'http://localhost:5173', reuseExistingServer: true, timeout: 60000 }] });
