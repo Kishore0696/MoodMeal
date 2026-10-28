@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: npm ci --include=dev && npm run build -w backend
-    startCommand: npm run db:migrate && npm run start -w backend
+    startCommand: node --env-file-if-exists=/etc/secrets/moodmeal.env scripts/start-production.mjs
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION

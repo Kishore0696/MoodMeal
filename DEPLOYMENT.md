@@ -40,11 +40,13 @@ Connect your GitHub repository to a new **Web Service** (Node runtime). Keep its
 | Setting | Value |
 |---|---|
 | Build | `npm ci --include=dev && npm run build -w backend` |
-| Start | `npm run db:migrate && npm run start -w backend` |
+| Start | `node --env-file-if-exists=/etc/secrets/moodmeal.env scripts/start-production.mjs` |
 | Health check | `/api/health` |
 | Node version | `24` |
 
 The committed `render.yaml` captures these settings. Starting with migration deploy allows the demonstration configuration to work without a paid pre-deploy command. For multi-instance production releases, move migration deployment to a single release job, then start only the application. Never run destructive reset commands on production.
+
+The production launcher passes the loaded environment to Prisma, waits for migrations to succeed, then starts the API. Settings can be ordinary Render environment variables or a Render secret file named `moodmeal.env`. Do not combine Node's `--env-file` with `--run`: settings from that file are not passed to the command launched by `--run`.
 
 Render's [Express deployment instructions](https://render.com/docs/deploy-node-express-app) explain Git connection and deployment. Free web services are appropriate for demonstration and can sleep; Render [does not recommend them for production](https://render.com/docs/free). Choose a suitable instance for real users.
 
