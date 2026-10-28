@@ -4,6 +4,15 @@ Target: Vercel frontend → Render Express backend → Neon PostgreSQL. All URLs
 
 ## 1. Push to GitHub
 
+### Current deployment progress
+
+- Source is published at https://github.com/Kishore0696/MoodMeal. Application commit `e9aaa60` passed all GitHub Actions checks, including PostgreSQL migration/seeding, backend tests, both builds, and browser workflows.
+- Vercel project `moodmeal` has been created (project ID `prj_eiIxL2Im3mjJORBfbCgonU5QcbAA`). The verified domain `moodmeal-kishore0696.vercel.app` is assigned to it, but no deployment is live yet.
+- The Render blueprint uses this exact frontend origin. Neon provisioning, Render provisioning, production migrations/seeding, the Vercel API rewrite, and live verification remain pending provider access.
+- Do not deploy the frontend until `REPLACE_WITH_RENDER_HOST` in `frontend/vercel.json` is replaced with the actual healthy backend hostname.
+
+The following instructions also support setting up a fresh copy in a different account; use that account's actual domain when configuring `FRONTEND_ORIGIN`.
+
 Create an empty private or public repository in your own GitHub account. Inspect `.gitignore` and verify `.env`, `.local`, `node_modules`, screenshots containing private records, and test traces are excluded. Both supplied reference documents contain student details; decide whether they belong in a public portfolio repository before adding them.
 
 ```sh

@@ -16,6 +16,6 @@ services:
       - key: DIRECT_URL
         sync: false
       - key: FRONTEND_ORIGIN
-        sync: false
+        value: https://moodmeal-kishore0696.vercel.app
       - key: COOKIE_SAME_SITE
         value: lax
