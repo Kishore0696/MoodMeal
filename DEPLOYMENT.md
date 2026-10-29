@@ -1,15 +1,30 @@
 # Deploying MoodMeal
 
-Target: Vercel frontend → Render Express backend → Neon PostgreSQL. All URLs below are configuration instructions; no live deployment is asserted. Node.js 24 is the tested runtime. Complete account authorization in the providers' dashboards; never paste database passwords or access tokens into chat or commit them.
+Architecture: Vercel frontend → Render Express backend → Neon PostgreSQL. Node.js 24 is the tested runtime. Complete account authorization in the providers' dashboards; never paste database passwords or access tokens into chat or commit them.
 
 ## 1. Push to GitHub
 
-### Current deployment progress
+### Current deployment
 
 - Source is published at https://github.com/Kishore0696/MoodMeal. Application commit `e9aaa60` passed all GitHub Actions checks, including PostgreSQL migration/seeding, backend tests, both builds, and browser workflows.
-- Vercel project `moodmeal` has been created (project ID `prj_eiIxL2Im3mjJORBfbCgonU5QcbAA`). The verified domain `moodmeal-kishore0696.vercel.app` is assigned to it, but no deployment is live yet.
-- The Render blueprint uses this exact frontend origin. Neon provisioning, Render provisioning, production migrations/seeding, the Vercel API rewrite, and live verification remain pending provider access.
-- Do not deploy the frontend until `REPLACE_WITH_RENDER_HOST` in `frontend/vercel.json` is replaced with the actual healthy backend hostname.
+- Website: https://moodmeal-kishore0696.vercel.app. Vercel project `moodmeal` (`prj_eiIxL2Im3mjJORBfbCgonU5QcbAA`), production deployment `dpl_9vZF3zvAcmRc3WPUodETmkmQzUrZ`, is READY.
+- Backend: https://moodmeal-api-nz04.onrender.com. Render service `srv-dbgkrauc6qcc73buvu4g` runs on the free plan in Singapore. Deployment `dep-dbgku6uc6qcc73bv7v1g` is live.
+- Neon project `misty-breeze-02487927`, branch `main`, contains the migrated PostgreSQL 17 schema, 42 recipes, 66 ingredients, and 210 mood tags. It uses 0.25 CU and the free plan's default idle suspension.
+- The deployed application source is commit `a6e8c50376614fe7804566176dad43c8aed86726`. Frontend files were compiled locally and uploaded through Vercel's authenticated file/deployment APIs after its Git import failed. The actual Vercel project therefore serves static build output (Framework: Other, root unset, output `.`; install/build commands empty).
+- Backend settings are loaded from Render's `moodmeal.env` secret file. The frontend's `/api` rewrite targets Render and preserves same-origin authentication. Render auto-deploy is disabled, and frontend publishing is manual.
+- The public health check, SPA dashboard route, and complete account-to-meal browser workflow passed on 2026-10-29. Use the canonical website URL above for authentication; the backend permits that exact origin.
+
+#### Publishing later frontend changes
+
+Use the source repository as usual, then compile and include the routing configuration:
+
+```sh
+npm run deploy:prepare
+npx vercel link --cwd frontend/dist --project moodmeal --scope kishoreanand0606-gmailcoms-projects
+npx vercel deploy frontend/dist --prod --scope kishoreanand0606-gmailcoms-projects
+```
+
+Complete `npx vercel login` if the CLI requests authentication. The CLI's sign-in is separate from the Codex connection. Keep this project's static-output settings for this workflow. For Git-based automatic builds, first connect the repository in Vercel and restore the fresh-install settings in section 6. Deploy backend changes explicitly through Render and verify `/api/health` before testing the website.
 
 The following instructions also support setting up a fresh copy in a different account; use that account's actual domain when configuring `FRONTEND_ORIGIN`.
 

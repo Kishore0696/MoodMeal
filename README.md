@@ -2,6 +2,8 @@
 
 **Good food for every mood.** A full-stack recipe and nutrition recommender that combines your manually selected mood, pantry ingredients, and nutrition preferences. Created from the supplied professional training report and presentation; see [reference analysis](docs/REFERENCE_ANALYSIS.md).
 
+**Live website:** [MoodMeal on Vercel](https://moodmeal-kishore0696.vercel.app). The frontend connects to an Express API on Render and PostgreSQL on Neon. Free-tier backend wake-up can delay the first request after inactivity.
+
 ## Features
 
 - Responsive food discovery homepage, searchable/paginated recipe catalog, and recipe details.

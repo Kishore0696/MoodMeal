@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "concurrently -k \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
+    "deploy:prepare": "npm run build -w frontend && node scripts/prepare-vercel.mjs",
     "test": "npm run test -w backend",
     "test:e2e": "playwright test",
     "db:generate": "npm run db:generate -w backend",
